@@ -145,7 +145,7 @@ topwords <- topwords %>%
   rename(source = group,
          target = feature,
          value = freq_dur) %>% 
-  filter(source != target)
+  filter(source != target) 
 
 topwords <- topwords %>% 
   mutate(id_source = case_when(source == "bolsonaro" ~ 0,
@@ -159,11 +159,11 @@ topwords <- topwords %>%
          link_color = case_when(source == "bolsonaro" ~ scales::alpha("#2c7bb6", .4),
                                 source == "ciro" ~ scales::alpha("#fdae61", .4),
                                 source == "lula" ~ scales::alpha("#d7191c", .4),
-                                source == "simone" ~ scales::alpha("#018571", .4))
-         )
+                                source == "simone" ~ scales::alpha("#018571", .4))) 
 
 fig <- plot_ly(type = "sankey",
                orientation = "h",
+#               arrangement = "fixed",
                node = list(label = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", "Lula (PT)", "Simone Tebet (MDB)", "Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", "Lula (PT)", "Simone Tebet (MDB)"),
                            color = c("#2c7bb6", "#fdae61", "#d7191c", "#018571", "#2c7bb6", "#fdae61", "#d7191c", "#018571"),
                            pad = 15,
@@ -172,9 +172,12 @@ fig <- plot_ly(type = "sankey",
                                        width = 0.5)),
                link = list(source = topwords$id_source,
                            target = topwords$id_target,
-                           value =  topwords$value,
-                          color = topwords$link_color)
-               )
+                           value =  topwords$frequency,
+                           color = topwords$link_color#,
+#                           line = list(color = "black",
+#                                       width = 0.5)
+)
+)
 
 fig %>% 
   config(displaylogo = FALSE, scrollZoom = TRUE) %>% 
@@ -184,6 +187,7 @@ fig %>%
   layout(autosize = F, #width = 500, 
          height = 450#, margin = m
          )
+
 ```
 
 <!---Column {data-width=600}

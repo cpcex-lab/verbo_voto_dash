@@ -6,10 +6,15 @@ output:
       bg: "#f2f2f2"
       fg: "#1A5653" 
       primary: "#2F5233"
-      base_font:
+      base_font: 
+        google: Prompt
+      heading_font:
         google: Prompt
       code_font:
-        google: JetBrains Mono
+        google: 
+          # arguments to sass::font_google() 
+          family: JetBrains Mono
+          local: false
     orientation: columns
     vertical_layout: fill
     source: true
@@ -52,7 +57,7 @@ pres_tidy <- pres_tidy %>%
 
 <style>
 p {
-  color: #868B8E;
+  color: #5a6063;
 }
 
 h4 {
@@ -72,13 +77,15 @@ Column
 -------------------------------------
 
 <h4>
-Olá, este é o Verbo ao Voto!
+Olá, este é o **Verbo ao Voto**!
 </h4>
 <br>
-<p>No dia 02 de outubro temos as eleições presidenciais. Até lá, os principais candidatos disputam voto a voto com propostas, promessas, debates, postagens em redes sociais e ataques a seus concorrentes em campanha diária. Para retratar a corrida pelo planalto o Laboratório de Ciência Política Computacional e Experimental [(@cpcex_lab)](www.twitter.com/cpcex_lab) lança seu monitor da campanha eleitoral, o Verbo ao Voto. O objetivo do projeto é subsidiar jornalistas, marqueteiros, analistas políticos, assessores, os próprios candidatos e a sociedade brasileira com informações sumárias e atualizadas sobre a disputa eleitoral. 
+<!--- Até lá, os principais candidatos disputam voto a voto com propostas, promessas, debates, postagens em redes sociais e ataques a seus concorrentes em campanha diária.--->
+<p>No dia 02 de outubro temos as eleições presidenciais. Para retratar a corrida pelo planalto o Laboratório de Ciência Política Computacional e Experimental [(@cpcex_lab)](www.twitter.com/cpcex_lab) lança seu monitor da campanha eleitoral, o **Verbo ao Voto**. O objetivo do projeto é subsidiar jornalistas, marqueteiros, analistas políticos, assessores, os próprios candidatos e a sociedade brasileira com informações sumárias e atualizadas sobre a disputa eleitoral. 
 </p>
-<p>Com o uso de aprendizagem computacional, estatísticas descritivas e inferenciais, sob liderança de [Mônica Rocobado](https://cpcex-lab.rbind.io/author/monica-rocabado/), mestranda em Administracao Pública e Governo pela FGV-EAESP, [Antonio Pires](https://cpcex-lab.rbind.io/author/antonio-pires/), doutorando em Ciência Política e Relações Internacionais na UFPE, e o [Prof. Dr. Davi Moreira](https://cpcex-lab.rbind.io/author/davi-moreira/), o projeto tem o objetivo de apresentar as principais dimensões da corrida presidencial. Para tanto, analisamos o conteúdo do banco de discursos produzido pela plataforma [Escriba](https://escriba.aosfatos.org/) e postagens dos perfis dos candidatos nas redes sociais. Em breve teremos mais atualizações!<!---Mais informações podem ser encontradas em nosso website.--->
+<p>Com o uso de aprendizagem computacional, estatísticas descritivas e inferenciais, sob liderança de [Mônica Rocabado](https://cpcex-lab.rbind.io/author/monica-rocabado/), mestranda em Administracao Pública e Governo pela FGV-EAESP, [Antonio Pires](https://cpcex-lab.rbind.io/author/antonio-pires/), doutorando em Ciência Política e Relações Internacionais na UFPE, e o [Prof. Dr. Davi Moreira](https://cpcex-lab.rbind.io/author/davi-moreira/), analisamos o conteúdo do banco de discursos produzido pela plataforma [Escriba](https://escriba.aosfatos.org/) e postagens dos perfis dos candidatos nas redes sociais. Em breve teremos mais atualizações!<!---Mais informações podem ser encontradas em nosso website.--->
 </p>
+<!--- o projeto tem o objetivo de apresentar as principais dimensões da corrida presidencial. Para tanto, a--->
 
 <h6>Contato: [cpcex.lab@ufpe.br](cpcex.lab@ufpe.br)</h6>
 
@@ -86,7 +93,6 @@ Column
 -------------------------------------
 ```{r, echo=FALSE, fig.align='center', fig.height=3}
 
-# knitr::include_graphics("verbo_voto_04.png")
 knitr::include_graphics("verbo_ao_voto_03.gif")
 
 ```
@@ -176,7 +182,7 @@ fig %>%
   # layout(font = list(size = 15), autosize=TRUE)
   # layout(autosize=TRUE)
   layout(autosize = F, #width = 500, 
-         height = 500#, margin = m
+         height = 450#, margin = m
          )
 ```
 
@@ -187,9 +193,10 @@ fig %>%
 
 <h4>Menção total por dia</h4>
 
+<!---
 <p>
 O gráfico abaixo apresenta o total de menções de um Candidato (Citado) por seus adversários por dia de campanha. <!---Vale ressaltar que não são contabilizadas auto citações e o total de citações é calculado pela soma de todas as fontes (entrevista, discurso, propaganda eleitoral, etc) que o candidato participou na data.--->
-</p>
+<!---</p>--->
 
 <center>
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align ='right'}
@@ -285,9 +292,10 @@ bscols(filter, p)
 
 <h4>Menções por dia</h4>
 
-<p>
+<!---<p>
 O gráfico abaixo apresenta o total de menções por dia de um Candidato (Autor) em relação a outro Candidato (Citado). <!---Vale ressaltar que não são contabilizadas auto citações e o total de citações é calculado pela soma de todas as fontes (entrevista, discurso, propaganda eleitoral, etc) que o candidato participou na data.--->
-</p>
+<!---</p>
+--->
 
 <center>
 ```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align ='right'}

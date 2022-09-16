@@ -1,0 +1,438 @@
+---
+title: "Verbo ao Voto (v.0.0.1)"
+output: 
+  flexdashboard::flex_dashboard:
+    theme:
+      bg: "#f2f2f2"
+      fg: "#1A5653" 
+      primary: "#2F5233"
+      base_font:
+        google: Prompt
+      code_font:
+        google: JetBrains Mono
+    orientation: columns
+    vertical_layout: fill
+    source: true
+    social: menu
+    date: "Última atualização em:`r format(Sys.time(), '%d %B, %Y')`"
+
+---
+
+<!--- vertical_layout: scroll --->
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+# Install thematic and un-comment for themed static plots (i.e., ggplot2)
+# thematic::thematic_rmd()
+
+#devtools::install_github("gaospecial/wordcloud2") com esse pacote todo o resto funcionou!!! Usar essa versão da wordcloud
+
+library(tidyverse)
+library(quanteda)
+library(tidytext)
+library(plotly)
+library(lubridate)
+
+load("data/disc_pres_prod.RData")
+
+pres_tidy <- disc_pres %>%
+  unnest_tokens(word, text) %>%
+  count(authors_min, word, sort = TRUE)
+
+total_words <- pres_tidy %>% 
+  group_by(authors_min) %>% 
+  summarize(total = sum(n))
+
+pres_tidy <- left_join(pres_tidy, total_words)
+
+pres_tidy <- pres_tidy %>%
+  bind_tf_idf(word, authors_min, n)
+
+```
+
+<style>
+p {
+  color: #868B8E;
+}
+
+h4 {
+  color: #1A5653;
+}
+
+body {    /*push content away from far right and left edges*/
+  margin-right: 2%;
+  margin-left: 2%;
+}
+</style>
+
+Sobre {data-icon="fa-home"}
+===================================================================
+
+Column
+-------------------------------------
+
+<h4>
+Olá, este é o Verbo ao Voto!
+</h4>
+<br>
+<p>No dia 02 de outubro temos as eleições presidenciais. Até lá, os principais candidatos disputam voto a voto com propostas, promessas, debates, postagens em redes sociais e ataques a seus concorrentes em campanha diária. Para retratar a corrida pelo planalto o Laboratório de Ciência Política Computacional e Experimental [(@cpcex_lab)](www.twitter.com/cpcex_lab) lança seu monitor da campanha eleitoral, o Verbo ao Voto. O objetivo do projeto é subsidiar jornalistas, marqueteiros, analistas políticos, assessores, os próprios candidatos e a sociedade brasileira com informações sumárias e atualizadas sobre a disputa eleitoral. 
+</p>
+<p>Com o uso de aprendizagem computacional, estatísticas descritivas e inferenciais, sob liderança de [Mônica Rocobado](https://cpcex-lab.rbind.io/author/monica-rocabado/), mestranda em Administracao Pública e Governo pela FGV-EAESP, [Antonio Pires](https://cpcex-lab.rbind.io/author/antonio-pires/), doutorando em Ciência Política e Relações Internacionais na UFPE, e o [Prof. Dr. Davi Moreira](https://cpcex-lab.rbind.io/author/davi-moreira/), o projeto tem o objetivo de apresentar as principais dimensões da corrida presidencial. Para tanto, analisamos o conteúdo do banco de discursos produzido pela plataforma [Escriba](https://escriba.aosfatos.org/) e postagens dos perfis dos candidatos nas redes sociais. Em breve teremos mais atualizações!<!---Mais informações podem ser encontradas em nosso website.--->
+</p>
+
+<h6>Contato: [cpcex.lab@ufpe.br](cpcex.lab@ufpe.br)</h6>
+
+Column
+-------------------------------------
+```{r, echo=FALSE, fig.align='center', fig.height=3}
+
+# knitr::include_graphics("verbo_voto_04.png")
+knitr::include_graphics("verbo_ao_voto_03.gif")
+
+```
+
+
+Quem menciona quem? {data-icon="fa-users"}
+===================================================================
+
+Inputs {.sidebar}
+----------------------------------------
+
+<h4> Bem ou mal, o importante é que fale de mim?</h4>
+<br>
+<p>Nessa sessão você conhece em que medida um determinado candidato cita nominalmente seus adversários. Apresentamos tanto o acumulado de menções quanto as menções por dia de campanha. **Atualizado em `r paste(day(unique(disc_pres$df_last_date)), month(unique(disc_pres$df_last_date), label = T, abbr = F, locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR")), year(unique(disc_pres$df_last_date)), sep = " de ")`**.</p>
+
+
+
+<!---Column {data-width=400}--->
+Column {.tabset}
+-------------------------------------
+
+### Menção total 
+
+<h4>Total de menções</h4>
+<p>O gráfico abaixo representa o total de menções do início da campanha presidencial, em 16 de agosto de 2022, até `r paste(day(unique(disc_pres$df_last_date)), month(unique(disc_pres$df_last_date), label = T, abbr = F, locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR")), year(unique(disc_pres$df_last_date)), sep = " de ")` em todas as fontes analisadas.</p>
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align ='right'}
+library(quanteda.textstats)
+library(plotly)
+#m <- list(
+#  l = 50,
+#  r = 50,
+#  b = 100,
+#  t = 100,
+#  pad = 4
+#)
+
+topwords <- toks_pres %>% 
+  tokens_keep(pattern = c('lula', 'ciro', 'bolsonaro', 'simone')) %>% 
+  dfm() %>% 
+  textstat_frequency(groups = authors_min) %>% 
+  tibble() 
+
+topwords <- topwords %>% 
+  select(group, feature, frequency) %>% 
+  left_join(disc_pres, by = c('group' = 'authors_min')) %>% 
+  select(group, feature, frequency, author_dur_disc) %>% 
+  unique() %>% 
+  mutate(freq_dur = frequency / author_dur_disc) %>% 
+  rename(source = group,
+         target = feature,
+         value = freq_dur) %>% 
+  filter(source != target)
+
+topwords <- topwords %>% 
+  mutate(id_source = case_when(source == "bolsonaro" ~ 0,
+                               source == "ciro" ~ 1,
+                               source == "lula" ~ 2,
+                               source == "simone" ~ 3),
+         id_target = case_when(target == "bolsonaro" ~ 4,
+                               target == "ciro" ~ 5,
+                               target == "lula" ~ 6,
+                               target == "simone" ~ 7),
+         link_color = case_when(source == "bolsonaro" ~ scales::alpha("#2c7bb6", .4),
+                                source == "ciro" ~ scales::alpha("#fdae61", .4),
+                                source == "lula" ~ scales::alpha("#d7191c", .4),
+                                source == "simone" ~ scales::alpha("#018571", .4))
+         )
+
+fig <- plot_ly(type = "sankey",
+               orientation = "h",
+               node = list(label = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", "Lula (PT)", "Simone Tebet (MDB)", "Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", "Lula (PT)", "Simone Tebet (MDB)"),
+                           color = c("#2c7bb6", "#fdae61", "#d7191c", "#018571", "#2c7bb6", "#fdae61", "#d7191c", "#018571"),
+                           pad = 15,
+                           thickness = 20,
+                           line = list(color = "black",
+                                       width = 0.5)),
+               link = list(source = topwords$id_source,
+                           target = topwords$id_target,
+                           value =  topwords$value,
+                          color = topwords$link_color)
+               )
+
+fig %>% 
+  config(displaylogo = FALSE, scrollZoom = TRUE) %>% 
+  #layout(font = list(size = 12), autosize=TRUE)
+  # layout(font = list(size = 15), autosize=TRUE)
+  # layout(autosize=TRUE)
+  layout(autosize = F, #width = 500, 
+         height = 500#, margin = m
+         )
+```
+
+<!---Column {data-width=600}
+------------------------------------->
+
+### Menção total por dia
+
+<h4>Menção total por dia</h4>
+
+<p>
+O gráfico abaixo apresenta o total de menções de um Candidato (Citado) por seus adversários por dia de campanha. <!---Vale ressaltar que não são contabilizadas auto citações e o total de citações é calculado pela soma de todas as fontes (entrevista, discurso, propaganda eleitoral, etc) que o candidato participou na data.--->
+</p>
+
+<center>
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align ='right'}
+library(lubridate)
+library(quanteda)
+library(quanteda.textstats)
+
+topwords_date <- toks_pres %>% 
+  tokens_keep(pattern = c('lula', 'ciro', 'bolsonaro', 'simone')) %>% 
+  dfm() %>% 
+  textstat_frequency(groups = interaction(authors_min, date)) %>% 
+  tibble() %>% 
+  separate(group, c("authors_min", "date"), "\\.") %>% 
+  filter(feature != authors_min) %>% 
+  mutate(Data = ymd(date, locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR"))) %>% 
+  # "Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", "Lula (PT)", "Simone Tebet (MDB)"
+  mutate(feature = case_when(feature == "bolsonaro" ~ "Jair Bolsonaro (PL)",
+                               feature == "ciro" ~ "Ciro Gomes (PDT)",
+                               feature == "lula" ~ "Lula (PT)",
+                               feature == "simone" ~ "Simone Tebet (MDB)"),
+         authors_min = case_when(authors_min == "bolsonaro" ~ "Jair Bolsonaro (PL)",
+                               authors_min == "ciro" ~ "Ciro Gomes (PDT)",
+                               authors_min == "lula" ~ "Lula (PT)",
+                               authors_min == "simone" ~ "Simone Tebet (MDB)")) %>%
+  group_by(feature, Data) %>%
+  summarise(freq_tot = sum(frequency))
+
+library(crosstalk)
+library(plotly)
+library(ggplot2)
+
+# cores
+# node = list(label = c("Bolsonaro", "Ciro", "Lula", "Simone", "Bolsonaro", "Ciro", "Lula", "Simone"),
+
+cand_cor <- tibble(cand = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", "Lula (PT)", "Simone Tebet (MDB)"),
+                   cor = c("#2c7bb6", "#fdae61", "#d7191c", "#018571"))
+                   
+topwords_date <- topwords_date %>% left_join(cand_cor, by = c("feature" = "cand"))
+
+# ref: https://rstudio.github.io/crosstalk/using.html
+
+shared_test <- SharedData$new(topwords_date)
+
+filter <- bscols( widths = c(2, NA, NA),
+  list(
+     filter_checkbox("feature", "Candidato citado:", shared_test, ~feature,
+                  inline = T#, multiple = TRUE#, columns = 2
+                  )
+    # filter_select("authors_min", "Candidato", shared_test, ~authors_min),
+    # filter_checkbox(
+    #   "helper_select_all",
+    #   label = "Reset filtering as deselecting from 'Select a flower' is not working",
+    #   shared_test, ~helper_select_all)
+  )#,
+  #  plot_ly(data = shared_test, x = ~Data, y = ~frequency, color = ~feature)
+
+)
+
+p <- plot_ly(data = shared_test, type = 'scatter', mode = 'lines') %>%
+            add_lines(x = ~Data, y = ~freq_tot, color = ~factor(feature),
+                      line = list(color = ~cor#, width = 2
+                                  ),
+                      # colors = ~cor,
+             hovertemplate = ~paste(" Citado: ", feature, "<br>",
+                                   "Freq: %{y}", "<br>",
+                                   "Data: %{x}"
+                                   )
+             ) %>%
+  layout(# title = 'custom tick labels', 
+        legend = list(title=list(text='<b> Candidato citado: </b>')),
+        yaxis = list(title = list(text ='Frequência'), 
+                     dtick=10),
+        xaxis = list(title = list(text ='Data'), 
+                     dtick = "D1", 
+                      tickangle=45,
+                      tickformat="%d/%m", 
+                      locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR"),
+                     rangeslider = list(type = "date")),    
+        autosize = T
+         ) %>%
+         config(displaylogo = FALSE) %>%
+         config(modeBarButtonsToRemove = c('lasso2d', 'select2d', 'zoom2d'))
+
+bscols(filter, p)
+
+
+```
+
+</center>
+
+
+### Menção por candidatos e por dia
+
+<h4>Menções por dia</h4>
+
+<p>
+O gráfico abaixo apresenta o total de menções por dia de um Candidato (Autor) em relação a outro Candidato (Citado). <!---Vale ressaltar que não são contabilizadas auto citações e o total de citações é calculado pela soma de todas as fontes (entrevista, discurso, propaganda eleitoral, etc) que o candidato participou na data.--->
+</p>
+
+<center>
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align ='right'}
+library(lubridate)
+library(quanteda)
+library(quanteda.textstats)
+
+topwords_date <- toks_pres %>% 
+  tokens_keep(pattern = c('lula', 'ciro', 'bolsonaro', 'simone')) %>% 
+  dfm() %>% 
+  textstat_frequency(groups = interaction(authors_min, date)) %>% 
+  tibble() %>% 
+  separate(group, c("authors_min", "date"), "\\.") %>% 
+  filter(feature != authors_min) %>% 
+  mutate(Data = ymd(date, locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR"))) %>% 
+  mutate(feature = case_when(feature == "bolsonaro" ~ "Jair Bolsonaro (PL)",
+                               feature == "ciro" ~ "Ciro Gomes (PDT)",
+                               feature == "lula" ~ "Lula (PT)",
+                               feature == "simone" ~ "Simone Tebet (MDB)"),
+         authors_min = case_when(authors_min == "bolsonaro" ~ "Jair Bolsonaro (PL)",
+                               authors_min == "ciro" ~ "Ciro Gomes (PDT)",
+                               authors_min == "lula" ~ "Lula (PT)",
+                               authors_min == "simone" ~ "Simone Tebet (MDB)"))
+
+library(crosstalk)
+library(plotly)
+
+cand_cor <- tibble(cand = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", "Lula (PT)", "Simone Tebet (MDB)"),
+                   cor = c("#2c7bb6", "#fdae61", "#d7191c", "#018571"))
+                   
+topwords_date <- topwords_date %>% left_join(cand_cor, by = c("feature" = "cand"))
+
+# ref: https://rstudio.github.io/crosstalk/using.html
+
+topwords_date$helper_select_all <- T
+
+shared_test <- SharedData$new(topwords_date)
+
+filter <- bscols( widths = c(2, NA, NA),
+  list(
+     filter_checkbox("authors_min", "Candidato autor:", shared_test, ~authors_min,
+                  inline = T#, multiple = TRUE#, columns = 2
+                  )
+    # filter_select("authors_min", "Candidato", shared_test, ~authors_min),
+    # filter_checkbox(
+    #   "helper_select_all",
+    #   label = "Reset filtering as deselecting from 'Select a flower' is not working",
+    #   shared_test, ~helper_select_all)
+  )#,
+  #  plot_ly(data = shared_test, x = ~Data, y = ~frequency, color = ~feature)
+
+)
+
+p <- plot_ly(data = shared_test, x = ~Data, y = ~frequency, 
+             color = ~feature,
+             colors = c("#2c7bb6", "#fdae61", "#d7191c", "#018571"),
+             hovertemplate = ~paste(" Autor: ", authors_min, "<br>",
+                                   "Citado: ", feature, "<br>",
+                                   "Freq: %{y}", "<br>",
+                                   "Data: %{x}"
+                                   )
+             ) %>%
+  layout(# title = 'custom tick labels', 
+        legend = list(title=list(text='<b> Candidato citado: </b>')),
+        yaxis = list(title = list(text ='Frequência'), 
+                     dtick=10),
+        xaxis = list(title = list(text ='Data'), 
+                     dtick = "D1", 
+                      tickangle=45,
+                      tickformat="%d/%m", 
+                      locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR"),
+                     rangeslider = list(type = "date")),
+        autosize = T
+         ) %>%
+         config(displaylogo = FALSE) %>%
+         config(modeBarButtonsToRemove = c('lasso2d', 'select2d', 'zoom2d'))
+
+bscols(filter, p)
+
+
+```
+
+</center>
+
+<!--- Principais termos {data-icon="fa-comments"}
+===================================================================
+
+Inputs {.sidebar}
+-------------------------------------
+
+<h4>
+Nuvem de palavras de termos únicos
+</h4>
+<br>
+<p>As nuvens de palavras dos candidatos a presidência apresenta os termos mais utilizados e únicos pelos candidatos. A análise foi feita através do método de TF-IDF. Para realização das análises foi feita uma parceira com a plataforma [Escriba](https://escriba.aosfatos.org/) através de API desenvolvida por eles</p>
+
+Column {.tabset}
+-----------------------------------------------------------------------
+```{r, include=FALSE}
+ciro_tidy <- pres_tidy %>% 
+  filter(authors_min == "ciro") %>% 
+  select(word, tf_idf)
+
+lula_tidy <- pres_tidy %>% 
+  filter(authors_min == "lula") %>% 
+  select(word, tf_idf)
+
+bolsonaro_tidy <- pres_tidy %>% 
+  filter(authors_min == "bolsonaro") %>% 
+  select(word, tf_idf)
+
+simone_tidy <- pres_tidy %>% 
+  filter(authors_min == "simone") %>% 
+  select(word, tf_idf)
+```
+
+
+### Ciro Gomes (PDT)
+
+```{r, echo=FALSE, fig.align = 'center'}
+#### TIDY (TF IDF)
+
+wordcloud2::wordcloud2(ciro_tidy, widgetsize =c("1200","500"), backgroundColor="#f2f2f2")
+
+```
+
+### Luiz Inácio Lula da Silva (PT)
+
+```{r, echo=FALSE,fig.align = 'center'}
+wordcloud2::wordcloud2(lula_tidy, widgetsize =c("1200","500"), backgroundColor="#f2f2f2")
+```
+
+
+### Jair Bolsonaro (PL)
+
+
+```{r, echo=FALSE,fig.align = 'center'}
+wordcloud2::wordcloud2(bolsonaro_tidy,widgetsize =c("1200","500"), backgroundColor="#f2f2f2")
+```
+
+
+### Simone Tebet (MDB)
+
+```{r, echo=FALSE,fig.align = 'center'}
+wordcloud2::wordcloud2(simone_tidy,widgetsize =c("1200","500"), backgroundColor="#f2f2f2")
+
+```
+--->

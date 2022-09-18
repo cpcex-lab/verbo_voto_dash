@@ -190,6 +190,101 @@ fig %>%
 
 ```
 
+### Quem citou quem por semana?
+
+<h4>Quem citou quem por semana?</h4>
+<p>O gráfico abaixo representa o total de citações nominais de adversários na comunicação de um determinado candidato por semana, do início da campanha presidencial em 16 de agosto de 2022 até `r paste(day(unique(disc_pres$df_last_date)), month(unique(disc_pres$df_last_date), label = T, abbr = F, locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR")), year(unique(disc_pres$df_last_date)), sep = " de ")` em todas as fontes analisadas.</p>
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.align ='right'}
+library(quanteda.textstats)
+library(plotly)
+m <- list(
+  l = 50,
+  r = 50,
+  b = 190,
+  t = 10,
+  pad = 4
+)
+
+topwords <- toks_pres %>% 
+  #tokens_subset(semana == "Semana 1") %>% 
+  tokens_keep(pattern = c('lula', 'ciro', 'bolsonaro', 'simone')) %>% 
+  dfm() %>% 
+  textstat_frequency(groups = interaction(authors_min, semana)) %>% 
+  tibble() %>% 
+  separate(group, c("authors_min", "semana"), "\\.") %>% 
+  mutate(semana = factor(semana, levels = c("16/8 até 21/8", "22/8 até 28/8", 
+                                      "29/8 até 04/9", "05/9 até 11/9", 
+                                      "12/9 até 18/9")))
+
+topwords <- topwords %>% 
+  select(authors_min, semana, feature, frequency) %>% 
+  left_join(disc_pres, by = c('authors_min', 'semana')) %>% 
+  select(authors_min, semana, feature, frequency, author_dur_disc) %>% 
+  unique() %>% 
+  mutate(freq_dur = frequency / author_dur_disc) %>% 
+  rename(source = authors_min,
+         target = feature,
+         value = freq_dur) %>% 
+  filter(source != target) %>% 
+  arrange(semana)
+
+topwords <- topwords %>% 
+  mutate(id_source = case_when(source == "bolsonaro" ~ 0,
+                               source == "ciro" ~ 1,
+                               source == "lula" ~ 2,
+                               source == "simone" ~ 3),
+         id_target = case_when(target == "bolsonaro" ~ 4,
+                               target == "ciro" ~ 5,
+                               target == "lula" ~ 6,
+                               target == "simone" ~ 7),
+         link_color = case_when(source == "bolsonaro" ~ scales::alpha("#2c7bb6", .4),
+                                source == "ciro" ~ scales::alpha("#fdae61", .4),
+                                source == "lula" ~ scales::alpha("#d7191c", .4),
+                                source == "simone" ~ scales::alpha("#018571", .4))) 
+
+fig <- plot_ly(type = "sankey",
+               orientation = "h",
+               arrangement = "fixed", 
+               # sizes = c(8, 80),
+               frame = ~factor(topwords$semana, 
+                               levels = c("16/8 até 21/8", "22/8 até 28/8", 
+                                          "29/8 até 04/9", "05/9 até 11/9", 
+                                          "12/9 até 18/9")),
+               node = list(label = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 
+                                     "Lula (PT)", "Simone Tebet (MDB)", 
+                                     "Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 
+                                     "Lula (PT)", "Simone Tebet (MDB)"),
+                           color = c("#2c7bb6", "#fdae61", "#d7191c", "#018571", 
+                                     "#2c7bb6", "#fdae61", "#d7191c", "#018571"),
+                           # x = c(0.017, 0.017, 0.017, 0.017),
+                           # y = c(0.06, 0.47, 0.85, 0.96),
+#                           pad = 15,
+                           thickness = 20,
+                           line = list(color = "black",
+                                       width = 0.5)),
+               link = list(source = topwords$id_source,
+                           target = topwords$id_target,
+                           value =  topwords$frequency,
+                           color = topwords$link_color#,
+#                           line = list(color = "black",
+#                                       width = 0.5)
+
+)
+               )
+fig %>% 
+  animation_slider(currentvalue = list(prefix = "Semana: ", 
+                                       font = list(color="grey30", size = 11))) %>%
+  layout(autosize = T, #width = 500, 
+         height = 500, 
+         margin = m,
+         font = list(size = 11))
+
+  #layout(title = "Quem cita quem?",
+  #       font = list(size = 10))
+
+```
+
 <!---Column {data-width=600}
 ------------------------------------->
 

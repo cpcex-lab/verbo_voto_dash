@@ -106,7 +106,7 @@ Inputs {.sidebar}
 
 <h4> Bem ou mal, o importante é que fale de mim?</h4>
 <br>
-<p>Nessa sessão você conhece em que medida um determinado candidato foi nominalmente citado durante a comunicação de seus adversários desde o início da campanha presidencial, em 16 de Agosto de 2022. Apresentamos quem citou quem, o acumulado de citações, e as menções por dia de campanha. **Atualizado com dados até `r paste(day(unique(disc_pres$df_last_date)), month(unique(disc_pres$df_last_date), label = T, abbr = F, locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR")), year(unique(disc_pres$df_last_date)), sep = " de ")`**.</p>
+<p>Aqui você conhece em que medida um determinado candidato foi nominalmente citado durante a comunicação de seus adversários desde o início da campanha presidencial, em 16 de Agosto de 2022. Apresentamos quem citou quem, o acumulado de citações, e as menções por dia de campanha. **Atualizado com dados até `r paste(day(unique(disc_pres$df_last_date)), month(unique(disc_pres$df_last_date), label = T, abbr = F, locale = Sys.setlocale(category = "LC_TIME", locale = "pt_BR")), year(unique(disc_pres$df_last_date)), sep = " de ")`**.</p>
 
 
 

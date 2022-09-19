@@ -273,6 +273,7 @@ fig <- plot_ly(type = "sankey",
 )
                )
 fig %>% 
+  animation_opts(2000) %>% 
   animation_slider(currentvalue = list(prefix = "Semana: ", 
                                        font = list(color="grey30", size = 11))) %>%
   layout(autosize = T, #width = 500, 

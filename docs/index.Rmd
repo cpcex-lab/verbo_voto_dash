@@ -98,7 +98,7 @@ knitr::include_graphics("verbo_ao_voto_03.gif")
 ```
 
 
-Quem menciona quem? {data-icon="fa-users"}
+Quem cita quem? {data-icon="fa-users"}
 ===================================================================
 
 Inputs {.sidebar}
@@ -215,7 +215,8 @@ topwords <- toks_pres %>%
   separate(group, c("authors_min", "semana"), "\\.") %>% 
   mutate(semana = factor(semana, levels = c("16/8 até 21/8", "22/8 até 28/8", 
                                       "29/8 até 04/9", "05/9 até 11/9", 
-                                      "12/9 até 18/9")))
+                                      "12/9 até 18/9", 
+                                      "19/9 até 25/9")))
 
 topwords <- topwords %>% 
   select(authors_min, semana, feature, frequency) %>% 
@@ -250,7 +251,8 @@ fig <- plot_ly(type = "sankey",
                frame = ~factor(topwords$semana, 
                                levels = c("16/8 até 21/8", "22/8 até 28/8", 
                                           "29/8 até 04/9", "05/9 até 11/9", 
-                                          "12/9 até 18/9")),
+                                          "12/9 até 18/9", 
+                                          "19/9 até 25/9")),
                node = list(label = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 
                                      "Lula (PT)", "Simone Tebet (MDB)", 
                                      "Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 

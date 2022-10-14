@@ -218,7 +218,8 @@ topwords <- toks_pres %>%
                                       "12/9 até 18/9", 
                                       "19/9 até 25/9",
                                       "26/9 até 2/10",
-                                      "3/10 até 9/10")))
+                                      "3/10 até 9/10",
+                                      "10/10 até 16/10")))
 
 topwords <- topwords %>% 
   select(authors_min, semana, feature, frequency) %>% 
@@ -256,7 +257,8 @@ fig <- plot_ly(type = "sankey",
                                           "12/9 até 18/9", 
                                           "19/9 até 25/9",
                                           "26/9 até 2/10",
-                                          "3/10 até 9/10")),
+                                          "3/10 até 9/10",
+                                          "10/10 até 16/10")),
                node = list(label = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 
                                      "Lula (PT)", "Simone Tebet (MDB)", 
                                      "Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 

@@ -81,7 +81,7 @@ Olá, este é o **Verbo ao Voto**!
 </h4>
 <br>
 <!--- Até lá, os principais candidatos disputam voto a voto com propostas, promessas, debates, postagens em redes sociais e ataques a seus concorrentes em campanha diária.--->
-<p>No dia 02 de outubro temos as eleições presidenciais. Para retratar a corrida pelo planalto o **Laboratório de Ciência Política Computacional e Experimental [(@cpcex_lab)](www.twitter.com/cpcex_lab) da UFPE** lança seu monitor da campanha eleitoral, o **Verbo ao Voto**. O objetivo do projeto é subsidiar jornalistas, marqueteiros, analistas políticos, assessores, os próprios candidatos e a sociedade brasileira com informações sumárias e atualizadas sobre a disputa eleitoral. 
+<p>Em outubro temos as eleições presidenciais. Para retratar a corrida pelo planalto o **Laboratório de Ciência Política Computacional e Experimental [(@cpcex_lab)](www.twitter.com/cpcex_lab) da UFPE** lança seu monitor da campanha eleitoral, o **Verbo ao Voto**. O objetivo do projeto é subsidiar jornalistas, marqueteiros, analistas políticos, assessores, os próprios candidatos e a sociedade brasileira com informações sumárias e atualizadas sobre a disputa eleitoral. 
 </p>
 <p>Com o uso de aprendizagem computacional, estatísticas descritivas e inferenciais, sob liderança de [**Mônica Rocabado**](https://cpcex-lab.rbind.io/author/monica-rocabado/), mestranda em Administracao Pública e Governo pela FGV-EAESP, [**Antonio Pires**](https://cpcex-lab.rbind.io/author/antonio-pires/), doutorando em Ciência Política e Relações Internacionais na UFPE, e o [**Prof. Dr. Davi Moreira**](https://cpcex-lab.rbind.io/author/davi-moreira/), analisamos o conteúdo do banco de discursos produzido pela plataforma [**Escriba**](https://escriba.aosfatos.org/) e postagens dos perfis dos candidatos nas redes sociais. **Em breve teremos mais atualizações!**<!---Mais informações podem ser encontradas em nosso website.--->
 </p>
@@ -219,7 +219,10 @@ topwords <- toks_pres %>%
                                       "19/9 até 25/9",
                                       "26/9 até 2/10",
                                       "3/10 até 9/10",
-                                      "10/10 até 16/10")))
+                                      "10/10 até 16/10",
+                                      "17/10 até 23/10"#,
+                                      #"24/10 até 30/10"
+                                      )))
 
 topwords <- topwords %>% 
   select(authors_min, semana, feature, frequency) %>% 
@@ -258,7 +261,10 @@ fig <- plot_ly(type = "sankey",
                                           "19/9 até 25/9",
                                           "26/9 até 2/10",
                                           "3/10 até 9/10",
-                                          "10/10 até 16/10")),
+                                      "10/10 até 16/10",
+                                      "17/10 até 23/10"#,
+                                      #"24/10 até 30/10"
+                                          )),
                node = list(label = c("Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 
                                      "Lula (PT)", "Simone Tebet (MDB)", 
                                      "Jair Bolsonaro (PL)", "Ciro Gomes (PDT)", 
